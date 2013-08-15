@@ -53,6 +53,22 @@ require_once '../' . 'fitconfig.php';
 
 <?php
 
+function calculate_duration($duration)
+{
+	return $duration_string;
+}
+
+function activityToEnglish($activity)
+{
+	$activityMap = array(
+    "Cycling" => "cycling",
+    "Walking" => "for a walk",
+	"Running" => "for a run");
+	
+	return $activityMap[$activity];
+}
+
+
 // checking if the 'Remember me' checkbox was clicked
 if (isset($_GET['rem'])) {
 	session_start();
@@ -198,11 +214,19 @@ if ($rkActivities) {
 //print_r($rkActivities);
 //print_r($rkActivities->items);
 
-$distance_unit = "miles";
-$distance_convert = 0.000621371192;;
-for ($i=0; $i < 5; $i++) { 
+$distance_unit = "km";
+$distance_convert = 0.001;
+for ($i=0; $i < 9; $i++) { 
 	
  $value = $rkActivities->items[$i];
+	
+	
+	$da =new DateTime($value->start_time);
+	//$value->start_time
+	
+	
+	
+	//
 	?>
 	
 	<article class="activity">
@@ -212,7 +236,7 @@ for ($i=0; $i < 5; $i++) {
 						<span>Distance: <?php echo round($value -> total_distance * $distance_convert, 2);
 							echo " ";
 							echo $distance_unit;
-						?></span> <span>Duration: 20minutes</span>
+						?></span> <span>Duration: <?php echo round($value->duration/60,1);?>minutes</span>
 					</div>
 					
 					<div class="small-6 large-2 columns">
@@ -226,9 +250,8 @@ for ($i=0; $i < 5; $i++) {
 								<form class="postbox" id="pf<?php echo $i; ?>">
 									<div class="small-6 large-10 columns">
 									<label>Message</label><br/>
-									<textarea class="postContent">Hey! I went <?php echo $value -> type; ?> at  <?php echo $value -> start_time; ?> it was  <?php echo round($value -> total_distance * $distance_convert, 2); ?> <?php echo $distance_unit; ?> it took 20minutes, check it on run keeper.
-http://www.runkeeper.com/user/<?php echo $user_info -> userID; ?>/activity/<?php echo(str_ireplace("/fitnessActivities/", "", $value -> uri)); ?>
-  #adnfitnesschallenge</textarea>
+<textarea class="postContent">I went <?php echo activityToEnglish($value -> type); ?> on <?php echo $da->format("l jS F Y \a\\t g:ia")?>, it was <?php echo "".round($value -> total_distance * $distance_convert, 2)." ".$distance_unit;?> long and took <?php echo round($value->duration/60,1);?> minutes http://www.runkeeper.com/user/<?php echo $user_info -> userID; ?>/activity/<?php echo(str_ireplace("/fitnessActivities/", "", $value -> uri)); ?>
+ #adnfitnesschallenge</textarea>
 </div>
 <div class="small-6 large-2 columns">
 									<a href="javascript:void(0)" class="button expand round postToAdn">Post</a><br />
@@ -316,8 +339,10 @@ http://www.runkeeper.com/user/<?php echo $user_info -> userID; ?>/activity/<?php
 				console.log(this);
 				var $this = $(this);
 				togglePostBox($this.attr("data-post-form-id"))
-				console.log($this.parent().children('a.openPostBox'));
-				$this.parent().siblings('a.openPostBox').toggleClass("secondary");
+				//console.log($this.parent().children('a.openPostBox'));
+				var button = $this.parents(".activity").find('a.openPostBox');
+				button.toggleClass("secondary");
+				button.toggleClass("small");
 				});
 
 				if (fit.user_token != "") {
