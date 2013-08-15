@@ -61,11 +61,18 @@ function calculate_duration($duration)
 function activityToEnglish($activity)
 {
 	$activityMap = array(
-    "Cycling" => "cycling",
+    "Cycling2" => "cycling",
     "Walking" => "for a walk",
 	"Running" => "for a run");
 	
-	return $activityMap[$activity];
+	if (array_key_exists($activity,$activityMap))
+	{
+		return $activityMap[$activity];
+	}
+	else
+	{
+		return strtolower($activity);
+	}	
 }
 
 
