@@ -1,32 +1,56 @@
-<!DOCTYPE html>
-<head>
+<?php
+//change path to the location of your config file
+require_once '../' . 'fitconfig.php';
+?><!DOCTYPE html>
+<html lang="en">
+        <head>
+                <meta charset="utf-8" />
 
-<meta charset=utf-8>
+                <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+                Remove this if you use the .htaccess -->
+                <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-<meta name="viewport" content="width=device-width">
+                <title>fit</title>
+                <meta name="description" content="" />
+                <meta name="author" content="ian" />
 
-<title>Fit &sect; lab.cdn.cx : lab &middot; /see/ /dee/ /en/ -dot- /see/ /eks/ :</title>
+                <meta name="viewport" content="width=device-width; initial-scale=1.0" />
 
-	<style>
-		@import 'http://yui.yahooapis.com/pure/0.2.1/pure-min.css';
-		@import '/f/ss-standard-optimized.css';
-		body {
-			padding: 0;
-			margin: 0;
-		}
-		html {/*body*/
-			height: 100%;
-		}
+                <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+                <link rel="shortcut icon" href="/favicon.ico" />
+                <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-		#userblk { background: rgba(255,255,255, .7); padding-left: 1em }
+                <link rel="stylesheet" href="../thirdparty/css/foundation.css">
 
- @media screen and (min-width: 36em) {
-   #userblk { padding-left: 0; position: absolute; right: 1em; top: 0; z-index: 53 }
- }
+                <script src="../thirdparty/js/vendor/custom.modernizr.js"></script>
+                 
+				<link rel="stylesheet" href="css/app.css">
 
-	</style>
-</head>
-<body>
+ 			
+				<style>
+					@media screen and (min-width: 36em) {
+						#userblk {
+							padding-left: 0;
+							position: absolute;
+							right: 1em;
+							top: 0;
+							z-index: 53
+						}
+					}
+				</style>
+        </head>
+ 
+<body class="dark">
+
+
+<header>
+	<div class="row">
+   <div class="large-8 columns"> <h1>fit-app.net <span class="small-text">Do you feel healthy?</span></h1>
+   
+   
+   </div>
+
+
 <?php
 
 // checking if the 'Remember me' checkbox was clicked
@@ -40,10 +64,10 @@ if (isset($_GET['rem'])) {
 	header('Location: .');
 }
 
-require_once '/path/to/' . 'AppDotNetPHP/EZAppDotNet.php';
+require_once APPDOT_PATH . 'AppDotNetPHP/EZAppDotNet.php';
 
-require_once '/path/to/' . 'runkeeper/vendor/autoload.php';
-require_once '/path/to/' . 'runkeeper/lib/runkeeperAPI.class.php';
+require_once RK_PATH . 'runkeeper/vendor/autoload.php';
+require_once RK_PATH . 'runkeeper/lib/runkeeperAPI.class.php';
 
 $app_scope        =  array(
 	// 'email', // Access the user's email address // has no effect?
@@ -60,14 +84,16 @@ $app_scope        =  array(
 $app = new EZAppDotNet();
 $url = $app->getAuthUrl();
 
-$_SESSION['path'] = 'fit/';
+$_SESSION['path'] = 'fitapp/';
 
+
+echo '<div class="large-4 columns"><aside class="userinfo">';
 // check that the user is signed in
 if ($app->getSession()) {
-
+	//echo "hello";
 	try {
 		$denied = $app->getUser();
-	//	print " error - we were granted access without a token?!?\n";
+		//print " error - we were granted access without a token?!?\n";
 	//	exit;
 	}
 	catch (AppDotNetException $e) { // catch revoked access and existing session // Safari 6 doesn't like
@@ -80,12 +106,12 @@ if ($app->getSession()) {
 		$app->deleteSession();
 		header('Location: .'); die;
 	}
-
+	
 
 	// get the current user as JSON
 	$data = $app->getUserTokenInfo('me');
 
-echo '<div id=userblk>';
+
 
 	// accessing the user's name
 	echo '<h3>'.$data['user']['name'].'</h3>';
@@ -98,7 +124,7 @@ echo '<div id=userblk>';
 // otherwise prompt to sign in
 } else {
 
-echo '<div id=userblk>';
+
 
 	echo '<a href="'.$url.'"><u>Sign in using App.net</u></a>';
 	if (isset($_SESSION['rem'])) {
@@ -108,33 +134,30 @@ echo '<div id=userblk>';
 	}
 	?>
 	<script>
-	document.getElementById('rem').onclick = function(e){
-		if (document.getElementById('rem').value=='1') {
-			window.location='?rem=2';
-		} else {
-			window.location='?rem=1';
-		};
-	}
+		document.getElementById('rem').onclick = function(e) {
+			if (document.getElementById('rem').value == '1') {
+				window.location = '?rem=2';
+			} else {
+				window.location = '?rem=1';
+			};
+		}
 	</script>
 	<?php
-}
-
+	}
 ?>
-</div>
 
-<h1>Do you feel healthy?<?php
 
-if(!$app->getSession()) {
-	echo '<span> &mdash; <a href="'.$url.'">Sign in using App.net</a>';
-	echo ' and find out.</span>';
-}
 
-?></h1>
+
+
+</aside>
+<aside class="userinfo">
+
 
 <?php
 if($app->getSession()) {
 
-$rk = new runkeeperAPI('/path/to/runkeeper/config/rk-api.yml');
+$rk = new runkeeperAPI(RK_API_YML);
 
 echo 'RunKeeper:';
 
@@ -158,85 +181,97 @@ $profile_read = $rk->doRunkeeperRequest('Profile', 'Read');
 
 echo '<a href="' . $profile_read->profile . '">' . $profile_read->name . '</a> ' . $profile_read->athlete_type;
 
-echo '<pre>';
 
-//print_r($profile_read);
-echo $rk->api_last_error;
 
-$user_read = $rk->doRunkeeperRequest('User', 'Read');
+?>
 
-//print_r($user_read);
-echo $rk->api_last_error;
+</aside>
+</div>
+</header>
+<section class="row">
+	
 
-//$weight_read = $rk->doRunkeeperRequest('Weight', 'Read', null, $user_read->weight);
-
-$settings_read = $rk->doRunkeeperRequest('Settings', 'Read');
-
-//echo print_r($weight_read, true);
-//echo $settings_read->weight_units;
-
-echo "\n";
-
-//print_r($settings_read);
-echo $rk->api_last_error;
-//print_r($rk->api_request_log);
-
-/* Do a "Read" request on "FitnessActivityFeed" interface => return all fields available for this Interface or false if request fails */
+<?php
 $rkActivities = $rk->doRunkeeperRequest('FitnessActivityFeed','Read');
+$user_info = $rk->doRunkeeperRequest('User', 'Read');
 if ($rkActivities) {
 //print_r($rkActivities);
-print_r($rkActivities->items[0]);
+//print_r($rkActivities->items);
 
-/*
+$distance_unit = "miles";
+$distance_convert = 0.000621371192;;
+for ($i=0; $i < 5; $i++) { 
+	
+ $value = $rkActivities->items[$i];
+	?>
+	
+	<article class="activity">
+		<div class="row">
+					<div class="small-6 large-10 columns">
+						<h4><?php echo $value -> type; ?> at <?php echo $value -> start_time; ?></h4>
+						<span>Distance: <?php echo round($value -> total_distance * $distance_convert, 2);
+							echo " ";
+							echo $distance_unit;
+						?></span> <span>Duration: 20minutes</span>
+					</div>
+					
+					<div class="small-6 large-2 columns">
+						<a href="javascript:void(0)" class="button round expand openPostBox" data-post-form-id="pf<?php echo $i; ?>">Post to adn</a>
+					</div>
+					
+					</div>
+						<!-- <div class="row">
+						<div class="large-12 columns">-->
+								<div class="row">
+								<form class="postbox" id="pf<?php echo $i; ?>">
+									<div class="small-6 large-10 columns">
+									<label>Message</label><br/>
+									<textarea class="postContent">Hey! I went <?php echo $value -> type; ?> at  <?php echo $value -> start_time; ?> it was  <?php echo round($value -> total_distance * $distance_convert, 2); ?> <?php echo $distance_unit; ?> it took 20minutes, check it on run keeper.
+http://www.runkeeper.com/user/<?php echo $user_info -> userID; ?>/activity/<?php echo(str_ireplace("/fitnessActivities/", "", $value -> uri)); ?>
+  #adnfitnesschallenge</textarea>
+</div>
+<div class="small-6 large-2 columns">
+									<a href="javascript:void(0)" class="button expand round postToAdn">Post</a><br />
+									<a href="javascript:void(0)" data-post-form-id="pf<?php echo $i; ?>" class="small button expand round secondary cancelPost">cancel</a>
+									</div>
+								</form>
+								</div>
+						<!--	</div>
+						</div>-->
 
-climb (m)
+					
+				</article>
+				
+	<?php
+	}
+	/*
 
-distance (m)
-duration (s)
-total_distance (m)
+	climb (m)
 
-*/
+	distance (m)
+	duration (s)
+	total_distance (m)
 
-echo $rkActivities->size . " activities\n"; // The total number of fitness activities across all pages
+	*/
+
+	
+	}
+	else {
+	echo $rk->api_last_error;
+	//print_r($rk->api_request_log);
+	}
+?>
+
+	
+	
+</section>
+
+<footer></footer>
+
+
+<?php
+
 }
-else {
-echo $rk->api_last_error;
-//print_r($rk->api_request_log);
-}
-
-// Do something with a result from the previous request
-/**/
-// Do a "Read" request on "FitnessActivities" interface => return all fields available for this Interface or false if request fails
-//$rkActivities = $rk->doRunkeeperRequest('FitnessActivity','Read',null,'/fitnessActivities/221748494');
-$rkActivities = $rk->doRunkeeperRequest('FitnessActivitySummary','Read',null, $rkActivities->items[0]->uri);
-if ($rkActivities) {
-print_r($rkActivities);
-}
-else {
-echo $rk->api_last_error;
-//print_r($rk->api_request_log);
-}
-/**/
-
-$record_read = $rk->doRunkeeperRequest('Records', 'Read'); // ,null,$user_read->records);
-
-/*
-
-climb (m)
-
-total_distance (m) [ distance available in non-Summary ]
-duration (s)
-
-*/
-
-print_r($record_read);
-echo $rk->api_last_error;
-//print_r($rk->api_request_log);
-
-echo '</pre>';
-
-}
-
 ?>
 
 <form action='' class=pure-form1 method=post>
@@ -245,16 +280,84 @@ echo '</pre>';
 <?php
 
 } else {
-
 ?>
 
-<section
+<section>
 </section>
 
 <?php
 }
 ?>
 
-<footer></footer>
+	<script src="../thirdparty/js/vendor/jquery.js"></script>
+		<script src="../thirdparty/js/vendor/appnet.2.js"></script>
+		<script src="../thirdparty/js/foundation.min.js"></script>
+
+		<script>
+		 				$(document).foundation();
+			var fit = window.fit || {};
+			fit.user_token = "<?php echo $_SESSION["AppDotNetPHPAccessToken"]; ?>
+				";
+
+				function togglePostBox(id) {
+				$("#"+id).toggle("slow");
+				}
+
+				$(document).on("click", "a.openPostBox", function() {
+
+				var $this = $(this);
+				togglePostBox($this.attr("data-post-form-id"))
+				$this.toggleClass("secondary");
+				$this.toggleClass("small");
+
+				});
+
+				$(document).on("click", "a.cancelPost", function() {
+				console.log(this);
+				var $this = $(this);
+				togglePostBox($this.attr("data-post-form-id"))
+				console.log($this.parent().children('a.openPostBox'));
+				$this.parent().siblings('a.openPostBox').toggleClass("secondary");
+				});
+
+				if (fit.user_token != "") {
+
+				$.appnet.authorize(fit.user_token);
+
+				$(document).on("click", "a.postToAdn", function() {
+				// $(this)
+				var $this = $(this);
+				var data = $this.parents("form").find(".postContent")[0].innerHTML;
+				var promise2 = $.appnet.post.create({
+				text : data
+				});
+				promise2.then(function(repsonse) {
+				//console.log(response);
+
+				togglePostBox($this.parent());
+				var b = $this.parent().siblings('a.openPostBox')
+				b.toggleClass("secondary");
+				b.toggleClass("success");
+				b.toggleClass("small");
+				b[0].innerHTML = "Activity Posted";
+
+				}, function(response) {
+				console.log('Error!');
+				});
+				});
+
+				/*	var apiurl = "https://alpha-api.app.net/stream/0/posts?access_token="+fit.access_token;
+
+				/*
+				*/
+
+				}
+				else
+				{
+				$("a.postToAdn").addClass("hide");
+				$("a.openPostBox").addClass("is-disabled")
+				}
+
+		</script>
 </body>
 </html>
